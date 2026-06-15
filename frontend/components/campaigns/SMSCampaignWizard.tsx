@@ -97,7 +97,7 @@ export function SMSCampaignWizard() {
       })
       const id = c.data.id
       setCampaignId(id)
-      await campaignsApi.send(id)
+      await campaignsApi.send(id, { sessionId: parsed.sessionId, templateId: selectedTemplate.id })
 
       const poll = async () => {
         try {

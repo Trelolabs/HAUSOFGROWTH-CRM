@@ -71,8 +71,8 @@ export const campaignsApi = {
   create: (payload: CreateCampaignPayload) =>
     http.post<ApiResponse<Campaign>>("/api/campaigns", payload).then((r) => r.data),
 
-  send: (id: string) =>
-    http.post<ApiResponse<{ queued: boolean }>>(`/api/campaigns/${id}/send`).then((r) => r.data),
+  send: (id: string, body?: { sessionId: string; templateId: string }) =>
+    http.post<ApiResponse<{ queued: boolean }>>(`/api/campaigns/${id}/send`, body).then((r) => r.data),
 
   progress: (id: string) =>
     http.get<ApiResponse<CampaignProgress>>(`/api/campaigns/${id}/progress`).then((r) => r.data),

@@ -70,6 +70,7 @@ export function CampaignDetail({ campaignId }: Props) {
           limit: 20,
           status: tab === "ALL" ? undefined : tab,
         })
+        console.log(r.data);
         setRecipients(r.data)
         setMeta({ total: r.meta.total, totalPages: r.meta.totalPages })
       } catch {

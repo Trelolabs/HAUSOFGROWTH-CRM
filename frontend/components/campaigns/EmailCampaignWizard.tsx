@@ -107,7 +107,7 @@ export function EmailCampaignWizard() {
       })
       const id = c.data.id
       setCampaignId(id)
-      await campaignsApi.send(id)
+      await campaignsApi.send(id, { sessionId: parsed.sessionId, templateId: selectedTemplate.id })
 
       // Start polling
       const poll = async () => {
