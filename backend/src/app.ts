@@ -29,15 +29,15 @@ if (env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000,
-//   max: 100,
-//   standardHeaders: true,
-//   legacyHeaders: false,
-//   message: { success: false, message: 'Too many requests', code: 'RATE_LIMITED' },
-// })
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests', code: 'RATE_LIMITED' },
+})
 
-// app.use('/api', limiter)
+app.use('/api', limiter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, data: 'OK' })
