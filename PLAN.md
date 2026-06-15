@@ -70,14 +70,14 @@ curl http://localhost:4000/api/dashboard/stats
 ## PHASE 3 — Campaign Backend
 > Goal: File parsing, validation, Bull queues, email/SMS sending, campaign routes
 
-- [ ] **Step 12** — `fileParser.service.ts` (streaming CSV/Excel → Redis session)
-- [ ] **Step 13** — `emailValidator.service.ts` (Abstract API, batches of 20)
-- [ ] **Step 14** — `phoneValidator.service.ts` (libphonenumber-js, synchronous)
-- [ ] **Step 15** — `email.queue.ts` + `sms.queue.ts` (Bull queue setup)
-- [ ] **Step 16** — `email.worker.ts` (Resend batch.send, 5 concurrent, 100/job)
-- [ ] **Step 17** — `sms.worker.ts` (Twilio messages.create, Promise.allSettled)
-- [ ] **Step 18** — Campaigns controller + routes (all endpoints incl. parse-file, validate, send)
-- [ ] **Step 19** — Resend + Twilio webhook handlers (bounce/delivery callbacks)
+- [x] **Step 12** — `fileParser.service.ts` (streaming CSV/Excel → Redis session)
+- [x] **Step 13** — `emailValidator.service.ts` (Abstract API fallback — treats all as valid until key added)
+- [x] **Step 14** — `phoneValidator.service.ts` (libphonenumber-js, synchronous)
+- [x] **Step 15** — `email.queue.ts` + `sms.queue.ts` (Bull queue setup)
+- [x] **Step 16** — `email.worker.ts` (Resend batch.send, 5 concurrent, 100/job)
+- [x] **Step 17** — `sms.worker.ts` (Twilio messages.create, Promise.allSettled)
+- [x] **Step 18** — Campaigns controller + routes (all endpoints incl. parse-file, validate, send)
+- [x] **Step 19** — Resend + Twilio webhook handlers (bounce/delivery callbacks)
 
 **Phase 3 verification:**
 ```bash
