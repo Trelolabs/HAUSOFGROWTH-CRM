@@ -33,12 +33,19 @@ emailQueue.process(5, async (job) => {
   let batchError: string | null = null
 
   try {
+    // batchResult.data is CreateBatchSuccessResponse | null
+    // CreateBatchSuccessResponse.data is the actual array of { id: string }
     const batchResult = await resendClient.batch.send(batchPayload)
-    const sentEmails = new Set((batchResult.data ?? []).map((_, i) => i))
+
+    if (batchResult.error) {
+      throw new Error(batchResult.error.message)
+    }
+
+    const confirmedIds = batchResult.data?.data ?? []
 
     await Promise.all(
       recipients.map(async (r, i) => {
-        if (sentEmails.has(i)) {
+        if (confirmedIds[i]?.id) {
           sentCount++
           await prisma.campaignRecipient.update({
             where: { id: r.recipientId },
