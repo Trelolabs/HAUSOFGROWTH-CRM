@@ -98,11 +98,11 @@ curl -X POST http://localhost:4000/api/campaigns/validate-emails \
 ## PHASE 4 — Frontend Foundation
 > Goal: Next.js app running with dark theme, sidebar, API client, types
 
-- [ ] **Step 20** — `frontend/package.json` + `frontend/tailwind.config.ts` + `frontend/tsconfig.json`
-- [ ] **Step 21** — shadcn/ui setup (`components.json`, global CSS, base components)
-- [ ] **Step 22** — `app/layout.tsx` + `Sidebar.tsx` + `Header.tsx` + `PageWrapper.tsx`
-- [ ] **Step 23** — `lib/api.ts` (axios instance → Express, interceptors)
-- [ ] **Step 24** — `types/index.ts` (all TS interfaces + enums)
+- [x] **Step 20** — `frontend/package.json` + `frontend/tailwind.config.ts` + `frontend/tsconfig.json`
+- [x] **Step 21** — shadcn/ui setup (`components.json`, global CSS, base components)
+- [x] **Step 22** — `app/layout.tsx` + `Sidebar.tsx` + `Header.tsx` + `PageWrapper.tsx`
+- [x] **Step 23** — `lib/api.ts` (axios instance → Express, interceptors)
+- [x] **Step 24** — `types/index.ts` (all TS interfaces + enums)
 
 ---
 
