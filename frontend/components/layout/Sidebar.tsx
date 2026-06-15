@@ -33,7 +33,7 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
           <Zap className="h-4 w-4 text-primary-foreground" />
         </div>
-        <span className="text-sm font-semibold tracking-tight text-foreground">Agency CRM</span>
+        <span className="text-sm font-semibold tracking-tight text-foreground">HOG Agency CRM</span>
       </div>
 
       {/* Nav */}
