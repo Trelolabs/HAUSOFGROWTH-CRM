@@ -43,11 +43,11 @@ curl http://localhost:4000/api/health
 ## PHASE 2 — Backend Core
 > Goal: All CRUD routes for Leads, Dashboard, Templates + Webhook intake
 
-- [ ] **Step 7**  — `backend/src/routes/index.ts` (root router)
-- [ ] **Step 8**  — Leads controller + routes (full CRUD + pagination + search)
-- [ ] **Step 9**  — Webhooks controller (inbound lead from landing page, Resend, Twilio)
-- [ ] **Step 10** — Dashboard controller + routes (stats, campaign chart, leads chart)
-- [ ] **Step 11** — Templates controller + routes (email + sms CRUD)
+- [x] **Step 7**  — `backend/src/routes/index.ts` (root router)
+- [x] **Step 8**  — Leads controller + routes (full CRUD + pagination + search)
+- [x] **Step 9**  — Webhooks controller (inbound lead from landing page, Resend, Twilio)
+- [x] **Step 10** — Dashboard controller + routes (stats, campaign chart, leads chart)
+- [x] **Step 11** — Templates controller + routes (email + sms CRUD)
 
 **Phase 2 verification:**
 ```bash

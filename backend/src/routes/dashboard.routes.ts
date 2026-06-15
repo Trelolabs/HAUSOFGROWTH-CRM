@@ -1,8 +1,14 @@
 import { Router } from 'express'
+import {
+  getStats,
+  getCampaignChart,
+  getLeadsChart,
+} from '../controllers/dashboard.controller'
 
 const router = Router()
 
-// Placeholder — implemented in Phase 2 Step 10
-router.get('/stats', (_req, res) => res.json({ success: true, data: {} }))
+router.get('/stats', getStats)
+router.get('/campaign-chart', getCampaignChart)
+router.get('/leads-chart', getLeadsChart)
 
 export default router

@@ -1,9 +1,25 @@
 import { Router } from 'express'
+import {
+  getEmailTemplates,
+  createEmailTemplate,
+  updateEmailTemplate,
+  deleteEmailTemplate,
+  getSMSTemplates,
+  createSMSTemplate,
+  updateSMSTemplate,
+  deleteSMSTemplate,
+} from '../controllers/templates.controller'
 
 const router = Router()
 
-// Placeholder — implemented in Phase 2 Step 11
-router.get('/email', (_req, res) => res.json({ success: true, data: [] }))
-router.get('/sms', (_req, res) => res.json({ success: true, data: [] }))
+router.get('/email', getEmailTemplates)
+router.post('/email', createEmailTemplate)
+router.put('/email/:id', updateEmailTemplate)
+router.delete('/email/:id', deleteEmailTemplate)
+
+router.get('/sms', getSMSTemplates)
+router.post('/sms', createSMSTemplate)
+router.put('/sms/:id', updateSMSTemplate)
+router.delete('/sms/:id', deleteSMSTemplate)
 
 export default router

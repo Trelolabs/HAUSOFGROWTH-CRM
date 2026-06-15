@@ -1,8 +1,18 @@
 import { Router } from 'express'
+import {
+  getLeads,
+  createLead,
+  getLeadById,
+  updateLead,
+  deleteLead,
+} from '../controllers/leads.controller'
 
 const router = Router()
 
-// Placeholder — implemented in Phase 2 Step 8
-router.get('/', (_req, res) => res.json({ success: true, data: [], meta: { total: 0, page: 1, limit: 20 } }))
+router.get('/', getLeads)
+router.post('/', createLead)
+router.get('/:id', getLeadById)
+router.patch('/:id', updateLead)
+router.delete('/:id', deleteLead)
 
 export default router
