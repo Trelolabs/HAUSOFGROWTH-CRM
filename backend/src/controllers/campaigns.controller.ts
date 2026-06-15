@@ -6,11 +6,10 @@ import { ApiError } from '../utils/ApiError'
 import { successResponse, paginationMeta } from '../utils/ApiResponse'
 import { emailQueue } from '../queues/email.queue'
 import { smsQueue } from '../queues/sms.queue'
-import { parseFile } from '../services/fileParser.service'
+import { parseFile, getSession } from '../services/fileParser.service'
 import { validateEmails } from '../services/emailValidator.service'
 import { validatePhones } from '../services/phoneValidator.service'
-import { getSession } from '../services/fileParser.service'
-import { CampaignStatus, CampaignType, RecipientStatus } from '@prisma/client'
+import { Prisma, CampaignStatus, CampaignType, RecipientStatus } from '../types/prisma'
 
 const createCampaignSchema = z.object({
   name: z.string().min(1, 'Campaign name is required'),
@@ -142,7 +141,7 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
   }
 
   // Persist recipients + update campaign in one transaction
-  const recipientRecords = await prisma.$transaction(async (tx) => {
+  const recipientRecords = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.campaign.update({
       where: { id },
       data: {

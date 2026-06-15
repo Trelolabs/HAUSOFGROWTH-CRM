@@ -4,7 +4,7 @@ import { prisma } from '../config/db'
 import { asyncHandler } from '../utils/asyncHandler'
 import { ApiError } from '../utils/ApiError'
 import { successResponse, paginationMeta } from '../utils/ApiResponse'
-import { LeadSource, LeadStatus } from '@prisma/client'
+import { LeadSource, LeadStatus } from '../types/prisma'
 
 const createLeadSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),

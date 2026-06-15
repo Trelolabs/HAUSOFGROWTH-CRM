@@ -2,7 +2,7 @@ import { emailQueue } from '../queues/email.queue'
 import { resendClient } from '../config/resend'
 import { prisma } from '../config/db'
 import { env } from '../config/env'
-import { CampaignStatus, RecipientStatus } from '@prisma/client'
+import { CampaignStatus, RecipientStatus } from '../types/prisma'
 
 interface EmailRecipient {
   recipientId: string

@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 import { prisma } from '../config/db'
 import { asyncHandler } from '../utils/asyncHandler'
-import { RecipientStatus } from '@prisma/client'
+import { RecipientStatus } from '../types/prisma'
 
 const inboundLeadSchema = z.object({
   fullName: z.string().min(1),

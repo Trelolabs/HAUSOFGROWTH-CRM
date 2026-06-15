@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { prisma } from '../config/db'
 import { asyncHandler } from '../utils/asyncHandler'
 import { successResponse } from '../utils/ApiResponse'
-import { CampaignStatus, CampaignType } from '@prisma/client'
+import { CampaignStatus, CampaignType } from '../types/prisma'
 
 export const getStats = asyncHandler(async (_req: Request, res: Response) => {
   const now = new Date()

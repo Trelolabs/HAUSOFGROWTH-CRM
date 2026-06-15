@@ -2,7 +2,7 @@ import { smsQueue } from '../queues/sms.queue'
 import { twilioClient } from '../config/twilio'
 import { prisma } from '../config/db'
 import { env } from '../config/env'
-import { CampaignStatus, RecipientStatus } from '@prisma/client'
+import { CampaignStatus, RecipientStatus } from '../types/prisma'
 
 interface SmsRecipient {
   recipientId: string
