@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import { Toaster } from "react-hot-toast"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { Header } from "@/components/layout/Header"
+import { ErrorBoundary } from "@/components/layout/ErrorBoundary"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -21,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex flex-1 flex-col overflow-hidden pl-60">
             <Header />
             <div className="flex-1 overflow-y-auto">
-              {children}
+              <ErrorBoundary>{children}</ErrorBoundary>
             </div>
           </div>
         </div>

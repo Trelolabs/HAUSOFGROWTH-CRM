@@ -254,7 +254,9 @@ export const exportFailedRecipients = asyncHandler(async (req: Request, res: Res
 export const parseUploadedFile = asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) throw ApiError.badRequest('No file uploaded')
 
-  const type = req.query['type'] as string
+  const type = req.body.type as string
+  console.log('type', type)
+  console.log('req.file', req.file)
   if (type !== 'email' && type !== 'sms') {
     throw ApiError.badRequest('Query param "type" must be "email" or "sms"')
   }

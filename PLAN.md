@@ -123,11 +123,11 @@ curl -X POST http://localhost:4000/api/campaigns/validate-emails \
 ## PHASE 6 — Polish & Connect
 > Goal: Production-ready UX, all flows tested end to end
 
-- [ ] **Step 33** — Loading skeletons on all pages
-- [ ] **Step 34** — Empty states on all tables/grids
-- [ ] **Step 35** — Toast notifications (react-hot-toast, success + error)
-- [ ] **Step 36** — Error boundaries (React ErrorBoundary in root layout)
-- [ ] **Step 37** — Final API wiring audit (all frontend → backend connections)
+- [x] **Step 33** — Loading skeletons on all pages
+- [x] **Step 34** — Empty states on all tables/grids
+- [x] **Step 35** — Toast notifications (react-hot-toast, success + error)
+- [x] **Step 36** — Error boundaries (React ErrorBoundary in root layout)
+- [x] **Step 37** — Final API wiring audit (all frontend → backend connections)
 - [ ] **Step 38** — End-to-end smoke test (full lead → campaign → send flow)
 
 ---
