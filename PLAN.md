@@ -109,14 +109,14 @@ curl -X POST http://localhost:4000/api/campaigns/validate-emails \
 ## PHASE 5 — Frontend Pages
 > Goal: All pages wired to real API data
 
-- [ ] **Step 25** — Dashboard page (stats cards, line chart, donut chart, recent campaigns table)
-- [ ] **Step 26** — Leads page (table + filters + LeadDrawer + LeadCreateModal)
-- [ ] **Step 27** — Email Templates page (grid + editor modal + preview modal)
-- [ ] **Step 28** — SMS Templates page (grid + editor modal + char counter)
-- [ ] **Step 29** — Email Campaign wizard (5 steps: upload → validate → template → review → progress)
-- [ ] **Step 30** — SMS Campaign wizard (same 5 steps, phone validation)
-- [ ] **Step 31** — Campaign list pages (email + sms)
-- [ ] **Step 32** — Campaign detail page (recipients tabs, export failed, stats)
+- [x] **Step 25** — Dashboard page (stats cards, line chart, donut chart, recent campaigns table)
+- [x] **Step 26** — Leads page (table + filters + LeadDrawer + LeadCreateModal)
+- [x] **Step 27** — Email Templates page (grid + editor modal + preview modal)
+- [x] **Step 28** — SMS Templates page (grid + editor modal + char counter)
+- [x] **Step 29** — Email Campaign wizard (5 steps: upload → validate → template → review → progress)
+- [x] **Step 30** — SMS Campaign wizard (same 5 steps, phone validation)
+- [x] **Step 31** — Campaign list pages (email + sms)
+- [x] **Step 32** — Campaign detail page (recipients tabs, export failed, stats)
 
 ---
 
