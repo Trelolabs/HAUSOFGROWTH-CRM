@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id             String      @id @default(cuid())
+  fullName       String
+  email          String?
+  whatsappNumber String?
+  businessName   String?
+  website        String?
+  interestedIn   String[]
+  message        String?     @db.Text
+  source         LeadSource  @default(LANDING_PAGE)
+  status         LeadStatus  @default(NEW)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  recipients     CampaignRecipient[]
+}
+
+model Campaign {
+  id           String         @id @default(cuid())
+  name         String
+  type         CampaignType
+  status       CampaignStatus @default(DRAFT)
+  templateId   String?
+  totalCount   Int            @default(0)
+  sentCount    Int            @default(0)
+  failedCount  Int            @default(0)
+  createdAt    DateTime       @default(now())
+  completedAt  DateTime?
+  recipients   CampaignRecipient[]
+}
+
+model CampaignRecipient {
+  id           String          @id @default(cuid())
+  campaignId   String
+  campaign     Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  leadId       String?
+  lead         Lead?           @relation(fields: [leadId], references: [id])
+  name         String
+  email        String?
+  phone        String?
+  status       RecipientStatus @default(PENDING)
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime        @default(now())
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  subject     String
+  htmlContent String   @db.Text
+  previewText String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SMSTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LeadSource {
+  LANDING_PAGE
+  MANUAL
+  IMPORT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+}
+
+enum CampaignStatus {
+  DRAFT
+  VALIDATING
+  QUEUED
+  SENDING
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+  SKIPPED
+}

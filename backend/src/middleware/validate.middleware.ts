@@ -1,0 +1,43 @@
+import { Request, Response, NextFunction } from 'express'
+import { ZodSchema, ZodError } from 'zod'
+import { ApiError } from '../utils/ApiError'
+
+export function validate(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      req.body = schema.parse(req.body)
+      next()
+    } catch (err) {
+      if (err instanceof ZodError) {
+        next(
+          ApiError.validation(
+            'Validation failed',
+            err.issues.map((i) => ({ path: i.path.join('.'), message: i.message }))
+          )
+        )
+      } else {
+        next(err)
+      }
+    }
+  }
+}
+
+export function validateQuery(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      req.query = schema.parse(req.query)
+      next()
+    } catch (err) {
+      if (err instanceof ZodError) {
+        next(
+          ApiError.validation(
+            'Invalid query parameters',
+            err.issues.map((i) => ({ path: i.path.join('.'), message: i.message }))
+          )
+        )
+      } else {
+        next(err)
+      }
+    }
+  }
+}
