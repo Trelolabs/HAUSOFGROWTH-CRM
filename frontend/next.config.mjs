@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['axios', 'recharts'],
+    serverComponentsExternalPackages: ['axios'],
   },
   webpack: (config) => {
     config.node = { __dirname: true };
