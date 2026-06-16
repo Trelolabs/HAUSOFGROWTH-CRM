@@ -120,14 +120,18 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
 
   // Fetch the template and resolve content
   let subject = ''
-  let htmlContent = ''
+  let bodyType: 'HTML' | 'TEXT' = 'HTML'
+  let htmlContent: string | null = null
+  let textContent: string | null = null
   let smsContent = ''
 
   if (campaign.type === CampaignType.EMAIL) {
     const template = await prisma.emailTemplate.findUnique({ where: { id: templateId } })
     if (!template) throw ApiError.notFound('Email template not found')
     subject = template.subject
-    htmlContent = template.htmlContent
+    bodyType = template.bodyType as 'HTML' | 'TEXT'
+    htmlContent = template.htmlContent ?? null
+    textContent = template.textContent ?? null
   } else {
     const template = await prisma.sMSTemplate.findUnique({ where: { id: templateId } })
     if (!template) throw ApiError.notFound('SMS template not found')
@@ -174,7 +178,9 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
           name: r.name,
           email: r.email!,
           subject,
-          htmlContent,
+          bodyType,
+          htmlContent: htmlContent ?? undefined,
+          textContent: textContent ?? undefined,
         })),
       })
     } else {

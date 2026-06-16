@@ -53,13 +53,15 @@ model CampaignRecipient {
 }
 
 model EmailTemplate {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   subject     String
-  htmlContent String   @db.Text
+  bodyType    EmailBodyType @default(HTML)
+  htmlContent String?       @db.Text
+  textContent String?       @db.Text
   previewText String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model SMSTemplate {
@@ -97,6 +99,11 @@ enum CampaignStatus {
   COMPLETED
   FAILED
   PAUSED
+}
+
+enum EmailBodyType {
+  HTML
+  TEXT
 }
 
 enum RecipientStatus {

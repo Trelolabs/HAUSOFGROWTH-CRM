@@ -9,7 +9,9 @@ interface EmailRecipient {
   name: string
   email: string
   subject: string
-  htmlContent: string
+  bodyType: 'HTML' | 'TEXT'
+  htmlContent?: string
+  textContent?: string
 }
 
 interface EmailJobData {
@@ -24,7 +26,9 @@ emailQueue.process(5, async (job) => {
     from: `Haus of Growth <${env.RESEND_FROM_EMAIL}>`,
     to: [r.email],
     subject: r.subject,
-    html: r.htmlContent.replace(/\{\{name\}\}/gi, r.name),
+    ...(r.bodyType === 'HTML'
+      ? { html: r.htmlContent!.replace(/\{\{name\}\}/gi, r.name) }
+      : { text: r.textContent!.replace(/\{\{name\}\}/gi, r.name) }),
   }))
 
   let sentCount = 0

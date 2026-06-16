@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Settings,
   Zap,
+  LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -25,6 +26,13 @@ const nav = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r bg-[hsl(var(--sidebar))]">
@@ -68,7 +76,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[hsl(var(--sidebar-border))] p-3">
+      <div className="border-t border-[hsl(var(--sidebar-border))] p-3 space-y-1">
         <Link
           href="/settings"
           className={cn(
@@ -81,6 +89,13 @@ export function Sidebar() {
           <Settings className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
           Settings
         </Link>
+        <button
+          onClick={handleLogout}
+          className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-[hsl(var(--sidebar-accent))] hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-destructive" />
+          Logout
+        </button>
       </div>
     </aside>
   )

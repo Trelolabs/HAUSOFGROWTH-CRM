@@ -5,12 +5,22 @@ import { asyncHandler } from '../utils/asyncHandler'
 import { ApiError } from '../utils/ApiError'
 import { successResponse } from '../utils/ApiResponse'
 
-const emailTemplateSchema = z.object({
+const emailTemplateBaseSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   subject: z.string().min(1, 'Subject is required'),
-  htmlContent: z.string().min(1, 'HTML content is required'),
+  bodyType: z.enum(['HTML', 'TEXT']).default('HTML'),
+  htmlContent: z.string().optional(),
+  textContent: z.string().optional(),
   previewText: z.string().optional(),
 })
+
+const emailTemplateSchema = emailTemplateBaseSchema.refine(
+  (d) => (d.bodyType === 'HTML' ? !!d.htmlContent?.trim() : !!d.textContent?.trim()),
+  (d) => ({
+    message: d.bodyType === 'HTML' ? 'HTML content is required' : 'Text content is required',
+    path: d.bodyType === 'HTML' ? ['htmlContent'] : ['textContent'],
+  })
+)
 
 const smsTemplateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -34,7 +44,7 @@ export const createEmailTemplate = asyncHandler(async (req: Request, res: Respon
 
 export const updateEmailTemplate = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params as { id: string }
-  const body = emailTemplateSchema.partial().parse(req.body)
+  const body = emailTemplateBaseSchema.partial().parse(req.body)
 
   const exists = await prisma.emailTemplate.findUnique({ where: { id } })
   if (!exists) throw ApiError.notFound('Email template not found')

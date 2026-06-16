@@ -12,6 +12,7 @@ export type CampaignStatus =
   | "FAILED"
   | "PAUSED"
 export type RecipientStatus = "PENDING" | "SENT" | "FAILED" | "BOUNCED" | "SKIPPED"
+export type EmailBodyType = "HTML" | "TEXT"
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -60,7 +61,9 @@ export interface EmailTemplate {
   id: string
   name: string
   subject: string
-  htmlContent: string
+  bodyType: EmailBodyType
+  htmlContent?: string | null
+  textContent?: string | null
   previewText?: string | null
   createdAt: string
   updatedAt: string
@@ -168,7 +171,9 @@ export interface UpdateLeadPayload extends Partial<CreateLeadPayload> {}
 export interface CreateEmailTemplatePayload {
   name: string
   subject: string
-  htmlContent: string
+  bodyType: EmailBodyType
+  htmlContent?: string
+  textContent?: string
   previewText?: string
 }
 

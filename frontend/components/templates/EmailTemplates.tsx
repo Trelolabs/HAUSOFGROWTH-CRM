@@ -18,12 +18,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { formatDate } from "@/lib/format"
-import type { EmailTemplate, CreateEmailTemplatePayload } from "@/types"
+import type { EmailTemplate, CreateEmailTemplatePayload, EmailBodyType } from "@/types"
 
 const EMPTY: CreateEmailTemplatePayload = {
   name: "",
   subject: "",
+  bodyType: "HTML",
   htmlContent: "",
+  textContent: "",
   previewText: "",
 }
 
@@ -58,7 +60,14 @@ export function EmailTemplates() {
 
   function openEdit(t: EmailTemplate) {
     setEditing(t)
-    setForm({ name: t.name, subject: t.subject, htmlContent: t.htmlContent, previewText: t.previewText ?? "" })
+    setForm({
+      name: t.name,
+      subject: t.subject,
+      bodyType: t.bodyType,
+      htmlContent: t.htmlContent ?? "",
+      textContent: t.textContent ?? "",
+      previewText: t.previewText ?? "",
+    })
     setEditorOpen(true)
   }
 
@@ -69,8 +78,9 @@ export function EmailTemplates() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.name.trim() || !form.subject.trim() || !form.htmlContent.trim()) {
-      toast.error("Name, subject and HTML content are required")
+    const bodyMissing = form.bodyType === "HTML" ? !form.htmlContent?.trim() : !form.textContent?.trim()
+    if (!form.name.trim() || !form.subject.trim() || bodyMissing) {
+      toast.error(`Name, subject and ${form.bodyType === "HTML" ? "HTML" : "text"} content are required`)
       return
     }
     setSaving(true)
@@ -129,12 +139,17 @@ export function EmailTemplates() {
           {templates.map((t) => (
             <Card key={t.id} className="group relative">
               <CardHeader>
-                <CardTitle className="text-base truncate">{t.name}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base truncate">{t.name}</CardTitle>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${t.bodyType === "TEXT" ? "bg-muted text-muted-foreground" : "bg-blue-500/10 text-blue-400"}`}>
+                    {t.bodyType}
+                  </span>
+                </div>
                 <CardDescription className="truncate">{t.subject}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground line-clamp-2">
-                  {t.previewText || "No preview text"}
+                  {t.previewText || (t.bodyType === "TEXT" ? t.textContent : "No preview text")}
                 </p>
                 <p className="mt-3 text-xs text-muted-foreground">{formatDate(t.updatedAt)}</p>
                 <div className="mt-4 flex gap-2">
@@ -191,15 +206,46 @@ export function EmailTemplates() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>HTML Content *</Label>
-                <Textarea
-                  value={form.htmlContent}
-                  onChange={(e) => setForm((f) => ({ ...f, htmlContent: e.target.value }))}
-                  placeholder="<html>…</html>"
-                  className="font-mono text-xs"
-                  rows={14}
-                />
+                <Label>Body Type *</Label>
+                <div className="flex rounded-md border overflow-hidden w-fit">
+                  {(["HTML", "TEXT"] as EmailBodyType[]).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, bodyType: type }))}
+                      className={`px-4 py-1.5 text-sm font-medium transition-colors ${
+                        form.bodyType === type
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {type === "HTML" ? "HTML Template" : "Plain Text Template"}
+                    </button>
+                  ))}
+                </div>
               </div>
+              {form.bodyType === "HTML" ? (
+                <div className="space-y-1.5">
+                  <Label>HTML Content *</Label>
+                  <Textarea
+                    value={form.htmlContent ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, htmlContent: e.target.value }))}
+                    placeholder="<html>…</html>"
+                    className="font-mono text-xs"
+                    rows={14}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label>Plain Text Content *</Label>
+                  <Textarea
+                    value={form.textContent ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, textContent: e.target.value }))}
+                    placeholder="Hi {{name}}, thanks for reaching out…"
+                    rows={14}
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditorOpen(false)}>
@@ -220,12 +266,18 @@ export function EmailTemplates() {
             <DialogTitle>{previewing?.name}</DialogTitle>
           </DialogHeader>
           <div className="mt-2 rounded-md border bg-white p-4">
-            <iframe
-              srcDoc={previewing?.htmlContent ?? ""}
-              title="Email preview"
-              className="h-[500px] w-full border-0"
-              sandbox="allow-same-origin"
-            />
+            {previewing?.bodyType === "TEXT" ? (
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 p-2 min-h-[200px]">
+                {previewing.textContent ?? "No content"}
+              </pre>
+            ) : (
+              <iframe
+                srcDoc={previewing?.htmlContent ?? ""}
+                title="Email preview"
+                className="h-[500px] w-full border-0"
+                sandbox="allow-same-origin"
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
