@@ -1,12 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['axios'],
-  },
-  webpack: (config) => {
-    config.node = { __dirname: true };
-    return config;
-  },
-}
+const nextConfig = {}
 
 export default nextConfig
