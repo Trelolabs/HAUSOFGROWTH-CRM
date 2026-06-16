@@ -16,7 +16,10 @@ const envSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().min(1, 'TWILIO_AUTH_TOKEN is required'),
   TWILIO_PHONE_NUMBER: z.string().min(1, 'TWILIO_PHONE_NUMBER is required'),
   ABSTRACT_API_KEY: z.string().min(1, 'ABSTRACT_API_KEY is required'),
-  FRONTEND_URL: z.string().url('FRONTEND_URL must be a valid URL').default('http://localhost:3000'),
+  FRONTEND_URL: z
+    .string()
+    .default('http://localhost:3000')
+    .transform((val) => val.split(',').map((u) => u.trim())),
 })
 
 const parsed = envSchema.safeParse(process.env)
