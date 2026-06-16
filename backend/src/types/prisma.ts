@@ -18,3 +18,4 @@ export type {
   EmailTemplate,
   SMSTemplate,
 } from '@prisma/client'
+
