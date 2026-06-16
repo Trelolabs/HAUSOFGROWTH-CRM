@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
@@ -10,7 +11,6 @@ import {
   FileText,
   MessageCircle,
   Settings,
-  Zap,
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -38,9 +38,14 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r bg-[hsl(var(--sidebar))]">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[hsl(var(--sidebar-border))] px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-          <Zap className="h-4 w-4 text-primary-foreground" />
-        </div>
+        <Image
+          src="/assets/images/app_logo.png"
+          alt="HOG Agency"
+          width={32}
+          height={32}
+          className="flex-shrink-0"
+          priority
+        />
         <span className="text-sm font-semibold tracking-tight text-foreground">HOG Agency CRM</span>
       </div>
 
