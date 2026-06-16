@@ -7,6 +7,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('4000').transform(Number),
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid PostgreSQL URL'),
+  REDIS_URL: z.string().optional(),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.string().default('6379').transform(Number),
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
