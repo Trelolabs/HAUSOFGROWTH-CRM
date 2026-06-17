@@ -35,28 +35,41 @@ export function SMSCampaignWizard() {
   const [file, setFile] = useState<File | null>(null)
   const [parsing, setParsing] = useState(false)
   const [parsed, setParsed] = useState<ParseFileResult | null>(null)
+  const [parseError, setParseError] = useState<string | null>(null)
 
   const [validating, setValidating] = useState(false)
   const [validated, setValidated] = useState<ValidatePhonesResult | null>(null)
+  const [validateError, setValidateError] = useState<string | null>(null)
 
   const [templates, setTemplates] = useState<SMSTemplate[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
+  const [templatesError, setTemplatesError] = useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<SMSTemplate | null>(null)
 
   const [campaignName, setCampaignName] = useState("")
   const [campaignId, setCampaignId] = useState<string | null>(null)
   const [progress, setProgress] = useState<CampaignProgress | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
   const pollRef = useRef<NodeJS.Timeout>()
 
   async function handleUpload() {
     if (!file) return
     setParsing(true)
+    setParseError(null)
     try {
       const r = await campaignsApi.parseFile(file, "sms")
-      setParsed(r.data)
-      toast.success(`Parsed ${r.data.total} rows`)
+      if (r.data.total === 0) {
+        const msg = "No valid rows found. Make sure your file has the required columns: name and phone."
+        setParseError(msg)
+        toast.error(msg)
+      } else {
+        setParsed(r.data)
+        toast.success(`Parsed ${r.data.total} rows`)
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Parse failed")
+      const msg = err instanceof Error ? err.message : "Parse failed"
+      setParseError(msg)
+      toast.error(msg)
     } finally {
       setParsing(false)
     }
@@ -64,11 +77,14 @@ export function SMSCampaignWizard() {
 
   async function runValidation(sessionId: string) {
     setValidating(true)
+    setValidateError(null)
     try {
       const r = await campaignsApi.validatePhones(sessionId)
       setValidated(r.data)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Validation failed")
+      const msg = err instanceof Error ? err.message : "Validation failed"
+      setValidateError(msg)
+      toast.error(msg)
     } finally {
       setValidating(false)
     }
@@ -76,11 +92,14 @@ export function SMSCampaignWizard() {
 
   async function loadTemplates() {
     setTemplatesLoading(true)
+    setTemplatesError(null)
     try {
       const r = await smsTemplatesApi.list()
       setTemplates(r.data)
-    } catch {
-      toast.error("Failed to load templates")
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to load templates"
+      setTemplatesError(msg)
+      toast.error(msg)
     } finally {
       setTemplatesLoading(false)
     }
@@ -88,6 +107,7 @@ export function SMSCampaignWizard() {
 
   async function createAndSend() {
     if (!parsed || !selectedTemplate || !campaignName.trim()) return
+    setSendError(null)
     try {
       const c = await campaignsApi.create({
         name: campaignName,
@@ -112,7 +132,9 @@ export function SMSCampaignWizard() {
       }
       poll()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send campaign")
+      const msg = err instanceof Error ? err.message : "Failed to send campaign"
+      setSendError(msg)
+      toast.error(msg)
     }
   }
 
@@ -171,9 +193,14 @@ export function SMSCampaignWizard() {
               <Input
                 type="file"
                 accept=".csv,.xlsx,.xls"
-                onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParsed(null) }}
+                onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParsed(null); setParseError(null) }}
               />
             </div>
+            {parseError && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                {parseError}
+              </div>
+            )}
             {file && !parsed && (
               <Button onClick={handleUpload} disabled={parsing}>
                 {parsing ? "Parsing…" : "Parse File"}
@@ -217,13 +244,23 @@ export function SMSCampaignWizard() {
             <CardDescription>Checking format of all phone numbers</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {validating || !validated ? (
+            {validating ? (
               <div className="space-y-3">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-3/4" />
                 <p className="text-sm text-muted-foreground">Validating {parsed?.total} numbers…</p>
               </div>
-            ) : (
+            ) : validateError ? (
+              <>
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {validateError}
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep("upload")}>Back</Button>
+                  <Button onClick={() => parsed && runValidation(parsed.sessionId)}>Retry</Button>
+                </div>
+              </>
+            ) : validated ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
                   {[
@@ -248,7 +285,7 @@ export function SMSCampaignWizard() {
                   </Button>
                 </div>
               </>
-            )}
+            ) : null}
           </CardContent>
         </Card>
       )}
@@ -263,6 +300,13 @@ export function SMSCampaignWizard() {
             {templatesLoading ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+              </div>
+            ) : templatesError ? (
+              <div className="space-y-3">
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {templatesError}
+                </div>
+                <Button variant="outline" onClick={loadTemplates}>Retry</Button>
               </div>
             ) : templates.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -344,7 +388,14 @@ export function SMSCampaignWizard() {
             <CardDescription>{campaignName}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!progress ? (
+            {sendError ? (
+              <>
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {sendError}
+                </div>
+                <Button variant="outline" onClick={() => setStep("review")}>Back to Review</Button>
+              </>
+            ) : !progress ? (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-8 w-full" />

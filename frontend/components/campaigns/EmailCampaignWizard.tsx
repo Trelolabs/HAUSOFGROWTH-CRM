@@ -36,14 +36,17 @@ export function EmailCampaignWizard() {
   const [file, setFile] = useState<File | null>(null)
   const [parsing, setParsing] = useState(false)
   const [parsed, setParsed] = useState<ParseFileResult | null>(null)
+  const [parseError, setParseError] = useState<string | null>(null)
 
   // Step 2 state
   const [validating, setValidating] = useState(false)
   const [validated, setValidated] = useState<ValidateEmailsResult | null>(null)
+  const [validateError, setValidateError] = useState<string | null>(null)
 
   // Step 3 state
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
+  const [templatesError, setTemplatesError] = useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
 
   // Step 4 state
@@ -52,18 +55,28 @@ export function EmailCampaignWizard() {
   // Step 5 state
   const [campaignId, setCampaignId] = useState<string | null>(null)
   const [progress, setProgress] = useState<CampaignProgress | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
   const pollRef = useRef<NodeJS.Timeout>()
 
   // Parse file (step 1)
   async function handleUpload() {
     if (!file) return
     setParsing(true)
+    setParseError(null)
     try {
       const r = await campaignsApi.parseFile(file, "email")
-      setParsed(r.data)
-      toast.success(`Parsed ${r.data.total} rows`)
+      if (r.data.total === 0) {
+        const msg = "No valid rows found. Make sure your file has the required columns: name and email."
+        setParseError(msg)
+        toast.error(msg)
+      } else {
+        setParsed(r.data)
+        toast.success(`Parsed ${r.data.total} rows`)
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Parse failed")
+      const msg = err instanceof Error ? err.message : "Parse failed"
+      setParseError(msg)
+      toast.error(msg)
     } finally {
       setParsing(false)
     }
@@ -72,11 +85,14 @@ export function EmailCampaignWizard() {
   // Validate emails (step 2 — auto-run when entering step)
   async function runValidation(sessionId: string) {
     setValidating(true)
+    setValidateError(null)
     try {
       const r = await campaignsApi.validateEmails(sessionId)
       setValidated(r.data)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Validation failed")
+      const msg = err instanceof Error ? err.message : "Validation failed"
+      setValidateError(msg)
+      toast.error(msg)
     } finally {
       setValidating(false)
     }
@@ -85,11 +101,14 @@ export function EmailCampaignWizard() {
   // Load templates (step 3 — auto-run when entering step)
   async function loadTemplates() {
     setTemplatesLoading(true)
+    setTemplatesError(null)
     try {
       const r = await emailTemplatesApi.list()
       setTemplates(r.data)
-    } catch {
-      toast.error("Failed to load templates")
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to load templates"
+      setTemplatesError(msg)
+      toast.error(msg)
     } finally {
       setTemplatesLoading(false)
     }
@@ -98,6 +117,7 @@ export function EmailCampaignWizard() {
   // Create + send campaign (step 5 — auto-run when entering step)
   async function createAndSend() {
     if (!parsed || !selectedTemplate || !campaignName.trim()) return
+    setSendError(null)
     try {
       const c = await campaignsApi.create({
         name: campaignName,
@@ -123,7 +143,9 @@ export function EmailCampaignWizard() {
       }
       poll()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send campaign")
+      const msg = err instanceof Error ? err.message : "Failed to send campaign"
+      setSendError(msg)
+      toast.error(msg)
     }
   }
 
@@ -183,9 +205,14 @@ export function EmailCampaignWizard() {
               <Input
                 type="file"
                 accept=".csv,.xlsx,.xls"
-                onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParsed(null) }}
+                onChange={(e) => { setFile(e.target.files?.[0] ?? null); setParsed(null); setParseError(null) }}
               />
             </div>
+            {parseError && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                {parseError}
+              </div>
+            )}
             {file && !parsed && (
               <Button onClick={handleUpload} disabled={parsing}>
                 {parsing ? "Parsing…" : "Parse File"}
@@ -231,14 +258,24 @@ export function EmailCampaignWizard() {
             <CardDescription>Checking validity of all email addresses</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {validating || !validated ? (
+            {validating ? (
               <div className="space-y-3">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-3/4" />
                 <p className="text-sm text-muted-foreground">Validating {parsed?.total} emails…</p>
               </div>
-            ) : (
+            ) : validateError ? (
+              <>
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {validateError}
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep("upload")}>Back</Button>
+                  <Button onClick={() => parsed && runValidation(parsed.sessionId)}>Retry</Button>
+                </div>
+              </>
+            ) : validated ? (
               <>
                 <div className="grid grid-cols-3 gap-4">
                   {[
@@ -267,7 +304,7 @@ export function EmailCampaignWizard() {
                   </Button>
                 </div>
               </>
-            )}
+            ) : null}
           </CardContent>
         </Card>
       )}
@@ -282,6 +319,13 @@ export function EmailCampaignWizard() {
             {templatesLoading ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+              </div>
+            ) : templatesError ? (
+              <div className="space-y-3">
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {templatesError}
+                </div>
+                <Button variant="outline" onClick={loadTemplates}>Retry</Button>
               </div>
             ) : templates.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -371,7 +415,14 @@ export function EmailCampaignWizard() {
             <CardDescription>{campaignName}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!progress ? (
+            {sendError ? (
+              <>
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                  {sendError}
+                </div>
+                <Button variant="outline" onClick={() => setStep("review")}>Back to Review</Button>
+              </>
+            ) : !progress ? (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-8 w-full" />
