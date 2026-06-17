@@ -17,11 +17,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { CampaignChartData } from "@/types"
 
 const TOOLTIP_STYLE = {
-  background: "hsl(222.2 47.4% 7.2%)",
-  border: "1px solid hsl(217.2 32.6% 17.5%)",
-  borderRadius: "6px",
+  background: "hsl(0 17% 12%)",
+  border: "1px solid hsl(0 23% 18%)",
+  borderRadius: "8px",
   fontSize: "12px",
-  color: "hsl(210 40% 98%)",
+  color: "hsl(33 39% 95%)",
 }
 
 export function CampaignChart() {
@@ -39,7 +39,7 @@ export function CampaignChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Campaign Activity — last 30 days
         </CardTitle>
       </CardHeader>
@@ -51,23 +51,23 @@ export function CampaignChart() {
             <AreaChart data={data} margin={{ top: 0, right: 8, left: -24, bottom: 0 }}>
               <defs>
                 <linearGradient id="gEmail" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#c41e3a" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#c41e3a" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gSms" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(217.2 32.6% 17.5%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 23% 18%)" />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11, fill: "hsl(215 20.2% 65.1%)" }}
+                tick={{ fontSize: 11, fill: "#a89f96" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "hsl(215 20.2% 65.1%)" }}
+                tick={{ fontSize: 11, fill: "#a89f96" }}
                 tickLine={false}
                 axisLine={false}
               />
@@ -77,7 +77,7 @@ export function CampaignChart() {
                 type="monotone"
                 dataKey="email"
                 name="Email"
-                stroke="#3b82f6"
+                stroke="#c41e3a"
                 fill="url(#gEmail)"
                 strokeWidth={2}
                 dot={false}
@@ -86,7 +86,7 @@ export function CampaignChart() {
                 type="monotone"
                 dataKey="sms"
                 name="SMS"
-                stroke="#10b981"
+                stroke="#f59e0b"
                 fill="url(#gSms)"
                 strokeWidth={2}
                 dot={false}

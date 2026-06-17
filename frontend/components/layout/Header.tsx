@@ -25,8 +25,11 @@ export function Header() {
   const title = getTitle(pathname)
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <h1 className="text-lg font-semibold">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-background/80 px-6 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      <h1 className="font-display text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+      <span className="text-xs font-medium text-muted-foreground tabular-nums">
+        {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+      </span>
     </header>
   )
 }

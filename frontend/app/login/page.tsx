@@ -2,11 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Zap } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,53 +38,90 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <Zap className="h-6 w-6 text-primary-foreground" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+      {/* Radial glow behind the card */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 0%, hsl(350 73% 30% / 0.25) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative w-full max-w-sm">
+        {/* Brand mark */}
+        <div className="mb-10 flex flex-col items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[hsl(0_23%_18%)] bg-[hsl(0_18%_7%)] shadow-lg">
+            <Image
+              src="/assets/images/app_logo.png"
+              alt="Haus of Growth"
+              width={32}
+              height={32}
+              priority
+            />
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">HOG Agency CRM</h1>
+          <div className="text-center">
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+              Haus of Growth
+            </h1>
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+              CRM Portal
+            </p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-lg">Sign in</CardTitle>
-            <CardDescription>Enter your credentials to access the CRM</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in…" : "Sign in"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        {/* Card */}
+        <div className="rounded-xl border border-[hsl(0_23%_18%)] bg-[hsl(0_17%_12%)] px-8 py-8 shadow-2xl">
+          <h2 className="mb-6 font-display text-lg font-semibold text-foreground">Sign in</h2>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label
+                htmlFor="username"
+                className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="password"
+                className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+
+            <Button type="submit" className="mt-2 w-full" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+        </div>
+
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Haus of Growth Marketing
+        </p>
       </div>
     </div>
   )

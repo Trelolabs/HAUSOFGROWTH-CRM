@@ -45,12 +45,14 @@ export function DashboardStats() {
         const raw = stats?.[key] ?? 0
         const value = isPercent ? formatPercent(raw) : formatNumber(raw)
         return (
-          <Card key={key}>
-            <CardContent className="pt-6">
-              <div className="flex flex-col gap-2">
-                <Icon className="h-4 w-4 text-primary" />
-                <div className="text-2xl font-bold tracking-tight">{value}</div>
-                <p className="text-xs text-muted-foreground">{label}</p>
+          <Card key={key} className="border-t-2 border-t-primary border-x-white/[0.07] border-b-white/[0.07]">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="font-display text-3xl font-bold tracking-tight text-foreground">{value}</div>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
               </div>
             </CardContent>
           </Card>

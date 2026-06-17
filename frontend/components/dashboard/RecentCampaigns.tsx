@@ -26,7 +26,7 @@ export function RecentCampaigns() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Recent Campaigns
         </CardTitle>
         <Link href="/campaigns/email" className="text-xs text-primary hover:underline">

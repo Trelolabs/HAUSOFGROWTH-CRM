@@ -35,22 +35,25 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r bg-[hsl(var(--sidebar))]">
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))]">
       {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[hsl(var(--sidebar-border))] px-5">
+      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[hsl(var(--sidebar-border))] px-5">
         <Image
           src="/assets/images/app_logo.png"
           alt="HOG Agency"
-          width={32}
-          height={32}
+          width={28}
+          height={28}
           className="flex-shrink-0"
           priority
         />
-        <span className="text-sm font-semibold tracking-tight text-foreground">HOG Agency CRM</span>
+        <div className="flex flex-col">
+          <span className="font-display text-sm font-semibold tracking-tight text-foreground">Haus of Growth</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-[hsl(var(--sidebar-primary))]">CRM</span>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
         {nav.map(({ label, href, icon: Icon }) => {
           const active =
             href === "/dashboard"
@@ -62,16 +65,19 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-150",
                 active
-                  ? "bg-[hsl(var(--sidebar-accent))] text-foreground"
-                  : "text-muted-foreground hover:bg-[hsl(var(--sidebar-accent))] hover:text-foreground"
+                  ? "bg-[hsl(var(--sidebar-primary))]/10 text-foreground"
+                  : "text-[#a89f96] hover:bg-[hsl(var(--sidebar-accent))] hover:text-foreground"
               )}
             >
+              {active && (
+                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-[hsl(var(--sidebar-primary))]" />
+              )}
               <Icon
                 className={cn(
                   "h-4 w-4 shrink-0 transition-colors",
-                  active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  active ? "text-[hsl(var(--sidebar-primary))]" : "text-[#7a726b] group-hover:text-foreground"
                 )}
               />
               {label}
@@ -81,24 +87,30 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[hsl(var(--sidebar-border))] p-3 space-y-1">
+      <div className="border-t border-[hsl(var(--sidebar-border))] p-3 space-y-0.5">
         <Link
           href="/settings"
           className={cn(
-            "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-150",
             pathname === "/settings"
-              ? "bg-[hsl(var(--sidebar-accent))] text-foreground"
-              : "text-muted-foreground hover:bg-[hsl(var(--sidebar-accent))] hover:text-foreground"
+              ? "bg-[hsl(var(--sidebar-primary))]/10 text-foreground"
+              : "text-[#a89f96] hover:bg-[hsl(var(--sidebar-accent))] hover:text-foreground"
           )}
         >
-          <Settings className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
+          {pathname === "/settings" && (
+            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-[hsl(var(--sidebar-primary))]" />
+          )}
+          <Settings className={cn(
+            "h-4 w-4 shrink-0 transition-colors",
+            pathname === "/settings" ? "text-[hsl(var(--sidebar-primary))]" : "text-[#7a726b] group-hover:text-foreground"
+          )} />
           Settings
         </Link>
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-[hsl(var(--sidebar-accent))] hover:text-destructive"
+          className="group flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-150 text-[#a89f96] hover:bg-[hsl(var(--sidebar-primary))]/10 hover:text-[hsl(var(--sidebar-primary))]"
         >
-          <LogOut className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-destructive" />
+          <LogOut className="h-4 w-4 shrink-0 text-[#7a726b] group-hover:text-[hsl(var(--sidebar-primary))] transition-colors" />
           Logout
         </button>
       </div>

@@ -1,10 +1,19 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { DM_Sans, Fraunces } from "next/font/google"
 import { Toaster } from "react-hot-toast"
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+})
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["300", "400", "500", "600", "700", "900"],
+})
 
 export const metadata: Metadata = {
   title: "HOG Agency CRM",
@@ -13,16 +22,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
+    <html lang="en" className={`dark ${dmSans.variable} ${fraunces.variable}`}>
+      <body className={dmSans.className}>
         <ConditionalLayout>{children}</ConditionalLayout>
         <Toaster
           position="top-right"
           toastOptions={{
             style: {
-              background: "hsl(222.2 47.4% 7.2%)",
-              color: "hsl(210 40% 98%)",
-              border: "1px solid hsl(217.2 32.6% 17.5%)",
+              background: "hsl(0 17% 12%)",
+              color: "hsl(33 39% 95%)",
+              border: "1px solid hsl(0 23% 18%)",
+              fontSize: "13px",
+              fontWeight: 500,
             },
           }}
         />

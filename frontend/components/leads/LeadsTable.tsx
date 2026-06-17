@@ -161,7 +161,7 @@ export function LeadsTable() {
               {leads.map((l) => (
                 <TableRow
                   key={l.id}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-primary/[0.06]"
                   onClick={() => openDrawer(l.id)}
                 >
                   <TableCell className="font-medium">{l.fullName}</TableCell>
