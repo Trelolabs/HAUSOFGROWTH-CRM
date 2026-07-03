@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
-import { Plus, Pencil, Trash2, Eye } from "lucide-react"
+import { Plus, Pencil, Trash2, Eye, Paperclip, X, Download } from "lucide-react"
 import { emailTemplatesApi } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,29 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { formatDate } from "@/lib/format"
-import type { EmailTemplate, CreateEmailTemplatePayload, EmailBodyType } from "@/types"
+import type { EmailTemplate, CreateEmailTemplatePayload, EmailBodyType, TemplateAttachment } from "@/types"
+
+const ATTACHMENT_ACCEPT = "application/pdf,image/png,image/jpeg,image/gif,image/webp"
+const MAX_ATTACHMENTS = 5
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function fileToAttachment(file: File): Promise<TemplateAttachment> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const content = (reader.result as string).split(",")[1]
+      resolve({ filename: file.name, mimetype: file.type, size: file.size, content })
+    }
+    reader.onerror = () => reject(new Error(`Failed to read ${file.name}`))
+    reader.readAsDataURL(file)
+  })
+}
 
 const EMPTY: CreateEmailTemplatePayload = {
   name: "",
@@ -27,6 +49,7 @@ const EMPTY: CreateEmailTemplatePayload = {
   htmlContent: "",
   textContent: "",
   previewText: "",
+  attachments: [],
 }
 
 export function EmailTemplates() {
@@ -67,8 +90,33 @@ export function EmailTemplates() {
       htmlContent: t.htmlContent ?? "",
       textContent: t.textContent ?? "",
       previewText: t.previewText ?? "",
+      attachments: t.attachments ?? [],
     })
     setEditorOpen(true)
+  }
+
+  async function addFiles(files: FileList | null) {
+    if (!files?.length) return
+    const current = form.attachments ?? []
+    if (current.length + files.length > MAX_ATTACHMENTS) {
+      toast.error(`Max ${MAX_ATTACHMENTS} attachments`)
+      return
+    }
+    const oversized = Array.from(files).find((f) => f.size > MAX_ATTACHMENT_SIZE)
+    if (oversized) {
+      toast.error(`${oversized.name} is over 10MB`)
+      return
+    }
+    try {
+      const added = await Promise.all(Array.from(files).map(fileToAttachment))
+      setForm((f) => ({ ...f, attachments: [...(f.attachments ?? []), ...added] }))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to read file")
+    }
+  }
+
+  function removeAttachment(index: number) {
+    setForm((f) => ({ ...f, attachments: (f.attachments ?? []).filter((_, i) => i !== index) }))
   }
 
   function openPreview(t: EmailTemplate) {
@@ -151,7 +199,15 @@ export function EmailTemplates() {
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {t.previewText || (t.bodyType === "TEXT" ? t.textContent : "No preview text")}
                 </p>
-                <p className="mt-3 text-xs text-muted-foreground">{formatDate(t.updatedAt)}</p>
+                <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                  {formatDate(t.updatedAt)}
+                  {!!t.attachments?.length && (
+                    <span className="flex items-center gap-1">
+                      <Paperclip className="h-3 w-3" />
+                      {t.attachments.length}
+                    </span>
+                  )}
+                </p>
                 <div className="mt-4 flex gap-2">
                   <Button size="sm" variant="ghost" onClick={() => openPreview(t)}>
                     <Eye className="mr-1.5 h-3.5 w-3.5" />
@@ -173,7 +229,7 @@ export function EmailTemplates() {
 
       {/* Editor modal */}
       <Dialog open={editorOpen} onOpenChange={(v) => !v && setEditorOpen(false)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Template" : "New Email Template"}</DialogTitle>
           </DialogHeader>
@@ -246,6 +302,40 @@ export function EmailTemplates() {
                   />
                 </div>
               )}
+              <div className="space-y-1.5">
+                <Label>Attachments</Label>
+                <div className="space-y-2">
+                  {(form.attachments ?? []).map((a, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
+                      <a
+                        href={`data:${a.mimetype};base64,${a.content}`}
+                        download={a.filename}
+                        className="flex items-center gap-2 truncate text-muted-foreground hover:text-foreground"
+                      >
+                        <Download className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{a.filename}</span>
+                        <span className="shrink-0 text-xs">({formatFileSize(a.size)})</span>
+                      </a>
+                      <button type="button" onClick={() => removeAttachment(i)} className="text-muted-foreground hover:text-destructive">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {(form.attachments?.length ?? 0) < MAX_ATTACHMENTS && (
+                    <label className="flex w-fit cursor-pointer items-center gap-1.5 rounded-md border border-dashed px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+                      <Paperclip className="h-3.5 w-3.5" />
+                      Add PDF or image
+                      <input
+                        type="file"
+                        accept={ATTACHMENT_ACCEPT}
+                        multiple
+                        className="hidden"
+                        onChange={(e) => { addFiles(e.target.files); e.target.value = "" }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditorOpen(false)}>

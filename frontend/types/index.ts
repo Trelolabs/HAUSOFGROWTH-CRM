@@ -57,6 +57,13 @@ export interface CampaignRecipient {
   createdAt: string
 }
 
+export interface TemplateAttachment {
+  filename: string
+  mimetype: string
+  size: number
+  content: string
+}
+
 export interface EmailTemplate {
   id: string
   name: string
@@ -67,6 +74,7 @@ export interface EmailTemplate {
   previewText?: string | null
   createdAt: string
   updatedAt: string
+  attachments?: TemplateAttachment[]
 }
 
 export interface SMSTemplate {
@@ -175,6 +183,7 @@ export interface CreateEmailTemplatePayload {
   htmlContent?: string
   textContent?: string
   previewText?: string
+  attachments?: TemplateAttachment[]
 }
 
 export interface UpdateEmailTemplatePayload extends Partial<CreateEmailTemplatePayload> {}

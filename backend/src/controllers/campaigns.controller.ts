@@ -69,11 +69,11 @@ export const getCampaignProgress = asyncHandler(async (req: Request, res: Respon
   if (!campaign) throw ApiError.notFound('Campaign not found')
 
   const processed = campaign.sentCount + campaign.failedCount
-  const percent = campaign.totalCount === 0
+  const percentage = campaign.totalCount === 0
     ? 0
     : Math.round((processed / campaign.totalCount) * 100)
 
-  res.json(successResponse({ ...campaign, percent }))
+  res.json(successResponse({ ...campaign, percentage }))
 })
 
 export const getCampaignRecipients = asyncHandler(async (req: Request, res: Response) => {
@@ -124,6 +124,7 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
   let htmlContent: string | null = null
   let textContent: string | null = null
   let smsContent = ''
+  let attachments: { filename: string; content: string }[] | undefined
 
   if (campaign.type === CampaignType.EMAIL) {
     const template = await prisma.emailTemplate.findUnique({ where: { id: templateId } })
@@ -132,6 +133,10 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
     bodyType = template.bodyType as 'HTML' | 'TEXT'
     htmlContent = template.htmlContent ?? null
     textContent = template.textContent ?? null
+    const rawAttachments = template.attachments as { filename: string; content: string }[] | null
+    attachments = rawAttachments?.length
+      ? rawAttachments.map((a) => ({ filename: a.filename, content: a.content }))
+      : undefined
   } else {
     const template = await prisma.sMSTemplate.findUnique({ where: { id: templateId } })
     if (!template) throw ApiError.notFound('SMS template not found')
@@ -182,6 +187,7 @@ export const sendCampaign = asyncHandler(async (req: Request, res: Response) => 
           htmlContent: htmlContent ?? undefined,
           textContent: textContent ?? undefined,
         })),
+        attachments,
       })
     } else {
       await smsQueue.add({

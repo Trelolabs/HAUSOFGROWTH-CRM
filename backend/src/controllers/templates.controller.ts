@@ -5,6 +5,13 @@ import { asyncHandler } from '../utils/asyncHandler'
 import { ApiError } from '../utils/ApiError'
 import { successResponse } from '../utils/ApiResponse'
 
+const attachmentSchema = z.object({
+  filename: z.string().min(1),
+  mimetype: z.enum(['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp']),
+  size: z.number().int().positive().max(10 * 1024 * 1024, 'File must be under 10MB'),
+  content: z.string().min(1),
+})
+
 const emailTemplateBaseSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   subject: z.string().min(1, 'Subject is required'),
@@ -12,6 +19,7 @@ const emailTemplateBaseSchema = z.object({
   htmlContent: z.string().optional(),
   textContent: z.string().optional(),
   previewText: z.string().optional(),
+  attachments: z.array(attachmentSchema).max(5, 'Max 5 attachments').optional(),
 })
 
 const emailTemplateSchema = emailTemplateBaseSchema.refine(
