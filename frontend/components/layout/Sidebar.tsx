@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
@@ -14,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { HogLogo } from "@/components/brand/HogLogo"
 
 const nav = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -38,14 +38,7 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))]">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[hsl(var(--sidebar-border))] px-5">
-        <Image
-          src="/assets/images/app_logo.png"
-          alt="HOG Agency"
-          width={28}
-          height={28}
-          className="flex-shrink-0"
-          priority
-        />
+        <HogLogo className="shrink-0 transition-transform duration-300 hover:scale-105" />
         <div className="flex flex-col">
           <span className="font-display text-sm font-semibold tracking-tight text-foreground">Haus of Growth</span>
           <span className="text-[10px] font-medium uppercase tracking-widest text-[hsl(var(--sidebar-primary))]">CRM</span>

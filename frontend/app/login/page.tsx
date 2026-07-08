@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { HogLogo } from "@/components/brand/HogLogo"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
@@ -51,15 +51,7 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Brand mark */}
         <div className="mb-10 flex flex-col items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[hsl(0_23%_18%)] bg-[hsl(0_18%_7%)] shadow-lg">
-            <Image
-              src="/assets/images/app_logo.png"
-              alt="Haus of Growth"
-              width={32}
-              height={32}
-              priority
-            />
-          </div>
+          <HogLogo className="h-16 w-16" textClassName="text-base" />
           <div className="text-center">
             <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
               Haus of Growth

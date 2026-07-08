@@ -60,3 +60,17 @@
     font-family: var(--font-dm-sans), sans-serif;
   }
 }
+
+@layer components {
+  /* HOG brand mark — dark disc with a red glow, matching the brand image */
+  .hog-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 50% 45%, #8f1d2d 0%, #3d0a12 42%, #0a0708 100%);
+    box-shadow:
+      0 0 16px 3px rgba(180, 30, 50, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  }
+}
