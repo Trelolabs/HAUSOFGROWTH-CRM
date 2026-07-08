@@ -50,6 +50,10 @@ model CampaignRecipient {
   phone        String?
   status       RecipientStatus @default(PENDING)
   errorMessage String?
+  // Resend's `email_id` for this send. Lets provider webhooks be matched to the
+  // exact recipient row instead of guessing by email address (which is
+  // ambiguous when the same address appears across campaigns / re-sends).
+  providerMessageId String?    @unique
   sentAt       DateTime?
   createdAt    DateTime        @default(now())
 }

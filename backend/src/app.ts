@@ -26,7 +26,16 @@ if (env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
 }
 
-app.use(express.json({ limit: '25mb' }))
+app.use(
+  express.json({
+    limit: '25mb',
+    // Keep the exact raw bytes so signed webhooks (Resend/Svix) can be
+    // verified — signature checks must run over the untouched payload.
+    verify: (req, _res, buf) => {
+      ;(req as express.Request & { rawBody?: Buffer }).rawBody = buf
+    },
+  })
+)
 app.use(express.urlencoded({ extended: true, limit: '25mb' }))
 
 // const limiter = rateLimit({

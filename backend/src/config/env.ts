@@ -12,6 +12,10 @@ const envSchema = z.object({
   REDIS_PORT: z.string().default('6379').transform(Number),
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
+  // Svix signing secret from the Resend webhook settings (whsec_…). Optional so
+  // existing deployments keep working; when set, incoming webhooks that fail
+  // signature verification are rejected.
+  RESEND_WEBHOOK_SECRET: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().min(1, 'TWILIO_ACCOUNT_SID is required'),
   TWILIO_AUTH_TOKEN: z.string().min(1, 'TWILIO_AUTH_TOKEN is required'),
   TWILIO_PHONE_NUMBER: z.string().min(1, 'TWILIO_PHONE_NUMBER is required'),
