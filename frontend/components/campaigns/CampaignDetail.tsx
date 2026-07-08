@@ -19,6 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { campaignStatusVariant, displayRecipientError, recipientStatusVariant, titleCase } from "@/lib/status"
 import { formatDate, formatDateTime } from "@/lib/format"
 import type { Campaign, CampaignRecipient, RecipientStatus } from "@/types"
@@ -48,6 +55,7 @@ export function CampaignDetail({ campaignId }: Props) {
   const [page, setPage] = useState(1)
   const [meta, setMeta] = useState({ total: 0, totalPages: 1 })
   const [sending, setSending] = useState(false)
+  const [errorDetail, setErrorDetail] = useState<string | null>(null)
   const pollRef = useRef<NodeJS.Timeout>()
 
   const fetchCampaign = useCallback(async () => {
@@ -276,8 +284,19 @@ export function CampaignDetail({ campaignId }: Props) {
                         {titleCase(r.status)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-destructive max-w-[200px] truncate">
-                      {displayRecipientError(r.errorMessage)}
+                    <TableCell className="text-xs text-destructive max-w-[200px]">
+                      {r.errorMessage ? (
+                        <button
+                          type="button"
+                          onClick={() => setErrorDetail(r.errorMessage!)}
+                          className="block max-w-full truncate text-left underline-offset-2 hover:underline"
+                          title="Click to view full error"
+                        >
+                          {displayRecipientError(r.errorMessage)}
+                        </button>
+                      ) : (
+                        <span className="truncate">{displayRecipientError(r.errorMessage)}</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">
                       {r.sentAt ? formatDateTime(r.sentAt) : "—"}
@@ -306,6 +325,21 @@ export function CampaignDetail({ campaignId }: Props) {
           )}
         </CardContent>
       </Card>
+
+      {/* Full error message modal */}
+      <Dialog open={!!errorDetail} onOpenChange={(open) => !open && setErrorDetail(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error details</DialogTitle>
+            <DialogDescription>The full error reported for this recipient.</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[50vh] overflow-y-auto rounded-md bg-muted p-4">
+            <p className="whitespace-pre-wrap break-words text-sm text-destructive">
+              {errorDetail}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
