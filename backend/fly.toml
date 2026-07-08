@@ -12,7 +12,11 @@ primary_region = 'iad'
 # Runs once in a temporary VM before new machines take traffic.
 # Applies any pending Prisma migrations to the production database.
 [deploy]
-  release_command = "npx prisma migrate deploy"
+  # Retry once: `migrate deploy` grabs a session advisory lock, which can briefly
+  # time out (P1002) if a previous/overlapping release still holds it. A short
+  # backoff + retry rides out that transient contention instead of failing the
+  # whole deploy.
+  release_command = "sh -c 'npx prisma migrate deploy || { echo \"migrate failed, retrying in 8s...\"; sleep 8; npx prisma migrate deploy; }'"
 
 [env]
   NODE_ENV = 'production'
