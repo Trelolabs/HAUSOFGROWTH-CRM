@@ -25,6 +25,48 @@ interface EmailJobData {
   attachments?: EmailAttachment[]
 }
 
+// Turn any thrown value into a short, human-readable reason for the UI.
+// Internal ORM / connection-pool errors must never be shown to end users —
+// they are infrastructure problems, not a reason the email itself failed.
+function toRecipientError(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err ?? 'Send failed')
+  if (/prisma\.|invocation|connection pool|timed out|ECONN|socket/i.test(raw)) {
+    return 'Temporary sending error'
+  }
+  return raw.length > 300 ? `${raw.slice(0, 300)}…` : raw
+}
+
+// Persist per-recipient outcomes using grouped updateMany calls instead of one
+// query per recipient. A batch of 100 becomes a handful of statements, so it
+// never exhausts the pooled DB connection (connection_limit=3) — which is what
+// previously timed out and falsely flipped SENT emails to FAILED.
+async function persistOutcomes(
+  sentIds: string[],
+  failed: { id: string; reason: string }[],
+  sentAt: Date
+): Promise<void> {
+  if (sentIds.length) {
+    await prisma.campaignRecipient.updateMany({
+      where: { id: { in: sentIds } },
+      data: { status: RecipientStatus.SENT, sentAt },
+    })
+  }
+
+  // Group failures by reason → one updateMany per distinct reason.
+  const byReason = new Map<string, string[]>()
+  for (const f of failed) {
+    const ids = byReason.get(f.reason) ?? []
+    ids.push(f.id)
+    byReason.set(f.reason, ids)
+  }
+  for (const [reason, ids] of byReason) {
+    await prisma.campaignRecipient.updateMany({
+      where: { id: { in: ids } },
+      data: { status: RecipientStatus.FAILED, errorMessage: reason },
+    })
+  }
+}
+
 emailQueue.process(5, async (job) => {
   const { campaignId, recipients, attachments } = job.data as EmailJobData
 
@@ -38,10 +80,14 @@ emailQueue.process(5, async (job) => {
     ...(attachments?.length ? { attachments } : {}),
   }))
 
-  let sentCount = 0
-  let failedCount = 0
   const now = new Date()
   let batchError: string | null = null
+
+  // Resolve the outcome of every recipient PURELY from the provider response
+  // first, then persist once. Persistence errors must never be able to
+  // reclassify an email that Resend already accepted as "failed".
+  const sentIds: string[] = []
+  const failed: { id: string; reason: string }[] = []
 
   // ponytail: Resend's batch API silently drops attachments, so attachment
   // campaigns fall back to per-recipient sends instead of one batch call.
@@ -51,20 +97,9 @@ emailQueue.process(5, async (job) => {
         try {
           const result = await resendClient.emails.send(batchPayload[i])
           if (result.error) throw new Error(result.error.message)
-          sentCount++
-          await prisma.campaignRecipient.update({
-            where: { id: r.recipientId },
-            data: { status: RecipientStatus.SENT, sentAt: now },
-          })
+          sentIds.push(r.recipientId)
         } catch (err) {
-          failedCount++
-          await prisma.campaignRecipient.update({
-            where: { id: r.recipientId },
-            data: {
-              status: RecipientStatus.FAILED,
-              errorMessage: err instanceof Error ? err.message : 'Send failed',
-            },
-          })
+          failed.push({ id: r.recipientId, reason: toRecipientError(err) })
         }
       })
     )
@@ -73,44 +108,27 @@ emailQueue.process(5, async (job) => {
       // batchResult.data is CreateBatchSuccessResponse | null
       // CreateBatchSuccessResponse.data is the actual array of { id: string }
       const batchResult = await resendClient.batch.send(batchPayload)
-
-      if (batchResult.error) {
-        throw new Error(batchResult.error.message)
-      }
+      if (batchResult.error) throw new Error(batchResult.error.message)
 
       const confirmedIds = batchResult.data?.data ?? []
-
-      await Promise.all(
-        recipients.map(async (r, i) => {
-          if (confirmedIds[i]?.id) {
-            sentCount++
-            await prisma.campaignRecipient.update({
-              where: { id: r.recipientId },
-              data: { status: RecipientStatus.SENT, sentAt: now },
-            })
-          } else {
-            failedCount++
-            await prisma.campaignRecipient.update({
-              where: { id: r.recipientId },
-              data: { status: RecipientStatus.FAILED, errorMessage: 'Not confirmed by Resend' },
-            })
-          }
-        })
-      )
+      recipients.forEach((r, i) => {
+        if (confirmedIds[i]?.id) sentIds.push(r.recipientId)
+        else failed.push({ id: r.recipientId, reason: 'Not confirmed by Resend' })
+      })
     } catch (err) {
-      batchError = err instanceof Error ? err.message : 'Batch send failed'
-      failedCount = recipients.length
-
-      await Promise.all(
-        recipients.map((r) =>
-          prisma.campaignRecipient.update({
-            where: { id: r.recipientId },
-            data: { status: RecipientStatus.FAILED, errorMessage: batchError! },
-          })
-        )
-      )
+      // The whole batch was rejected by Resend — a genuine send failure.
+      batchError = toRecipientError(err)
+      for (const r of recipients) failed.push({ id: r.recipientId, reason: batchError })
     }
   }
+
+  const sentCount = sentIds.length
+  const failedCount = failed.length
+
+  // Persist outcomes with pool-safe grouped writes. If this throws (e.g. a
+  // transient pool timeout), we log and rethrow so Bull retries the job —
+  // recipients keep their prior status instead of being falsely failed.
+  await persistOutcomes(sentIds, failed, now)
 
   // Atomically increment campaign counters
   await prisma.campaign.update({

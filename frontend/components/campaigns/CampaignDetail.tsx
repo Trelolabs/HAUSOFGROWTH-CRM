@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { campaignStatusVariant, recipientStatusVariant, titleCase } from "@/lib/status"
+import { campaignStatusVariant, displayRecipientError, recipientStatusVariant, titleCase } from "@/lib/status"
 import { formatDate, formatDateTime } from "@/lib/format"
 import type { Campaign, CampaignRecipient, RecipientStatus } from "@/types"
 
@@ -70,7 +70,6 @@ export function CampaignDetail({ campaignId }: Props) {
           limit: 20,
           status: tab === "ALL" ? undefined : tab,
         })
-        console.log(r.data);
         setRecipients(r.data)
         setMeta({ total: r.meta.total, totalPages: r.meta.totalPages })
       } catch {
@@ -278,7 +277,7 @@ export function CampaignDetail({ campaignId }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-destructive max-w-[200px] truncate">
-                      {r.errorMessage ?? "—"}
+                      {displayRecipientError(r.errorMessage)}
                     </TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">
                       {r.sentAt ? formatDateTime(r.sentAt) : "—"}

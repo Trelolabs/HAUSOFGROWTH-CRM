@@ -49,3 +49,15 @@ export function leadSourceVariant(s: LeadSource): BadgeVariant {
 export function titleCase(s: string): string {
   return s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, " ")
 }
+
+// Safety net for the Recipients "Error" column: never surface a raw internal
+// ORM / connection error (e.g. "Invalid `prisma.campaignRecipient.update()`
+// invocation: Timed out fetching a new connection from the pool") to the user.
+// Show a clean, human-readable reason instead.
+export function displayRecipientError(msg?: string | null): string {
+  if (!msg) return "—"
+  if (/prisma\.|invocation|connection pool|timed out|ECONN|socket/i.test(msg)) {
+    return "Temporary sending error"
+  }
+  return msg
+}
