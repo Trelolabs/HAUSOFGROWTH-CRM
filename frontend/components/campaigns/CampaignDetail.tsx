@@ -177,15 +177,26 @@ export function CampaignDetail({ campaignId }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { label: "Total", value: campaign.totalCount },
-          { label: "Sent", value: campaign.sentCount, green: true },
-          { label: "Failed", value: campaign.failedCount, red: true },
-        ].map(({ label, value, green, red }) => (
+          { label: "Sent", value: campaign.sentCount, tone: "green" as const },
+          { label: "Failed", value: campaign.failedCount, tone: "red" as const },
+          { label: "Bounced", value: campaign.bouncedCount, tone: "amber" as const },
+        ].map(({ label, value, tone }) => (
           <Card key={label}>
             <CardContent className="pt-6">
-              <div className={`text-2xl font-bold ${green ? "text-emerald-400" : red && value > 0 ? "text-destructive" : ""}`}>
+              <div
+                className={`text-2xl font-bold ${
+                  tone === "green"
+                    ? "text-emerald-400"
+                    : tone === "red" && value > 0
+                    ? "text-destructive"
+                    : tone === "amber" && value > 0
+                    ? "text-amber-400"
+                    : ""
+                }`}
+              >
                 {value.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{label}</p>

@@ -33,6 +33,7 @@ model Campaign {
   totalCount   Int            @default(0)
   sentCount    Int            @default(0)
   failedCount  Int            @default(0)
+  bouncedCount Int            @default(0)
   createdAt    DateTime       @default(now())
   completedAt  DateTime?
   recipients   CampaignRecipient[]

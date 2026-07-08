@@ -53,10 +53,44 @@ export const resendWebhook = asyncHandler(async (req: Request, res: Response) =>
     const newStatus = statusMap[type]
     if (!newStatus) return
 
-    await prisma.campaignRecipient.updateMany({
-      where: { email: data.to?.[0], status: RecipientStatus.SENT },
-      data: { status: newStatus, errorMessage: `Resend event: ${type}` },
+    const email = data.to?.[0]
+    if (!email) return
+
+    // Only transition rows that are still SENT — this also makes the webhook
+    // idempotent (a duplicate event finds nothing left to move, so counters
+    // are never double-adjusted).
+    const affected = await prisma.campaignRecipient.findMany({
+      where: { email, status: RecipientStatus.SENT },
+      select: { id: true, campaignId: true },
     })
+    if (affected.length === 0) return
+
+    // How many recipients transitioned per campaign, so we can keep the
+    // campaign's aggregate counters in sync with the per-recipient statuses.
+    const perCampaign = new Map<string, number>()
+    for (const r of affected) {
+      perCampaign.set(r.campaignId, (perCampaign.get(r.campaignId) ?? 0) + 1)
+    }
+
+    const ids = affected.map((r) => r.id)
+
+    await prisma.$transaction([
+      prisma.campaignRecipient.updateMany({
+        where: { id: { in: ids } },
+        data: { status: newStatus, errorMessage: `Resend event: ${type}` },
+      }),
+      // A bounced/complained recipient was previously counted as SENT, so move
+      // it out of sentCount and into the matching bucket.
+      ...[...perCampaign.entries()].map(([campaignId, count]) =>
+        prisma.campaign.update({
+          where: { id: campaignId },
+          data:
+            newStatus === RecipientStatus.BOUNCED
+              ? { sentCount: { decrement: count }, bouncedCount: { increment: count } }
+              : { sentCount: { decrement: count }, failedCount: { increment: count } },
+        })
+      ),
+    ])
   } catch (err) {
     console.error('[webhook/resend]', err)
   }

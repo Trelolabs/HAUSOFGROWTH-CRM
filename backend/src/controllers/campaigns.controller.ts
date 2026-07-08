@@ -63,12 +63,18 @@ export const getCampaignProgress = asyncHandler(async (req: Request, res: Respon
   // Fast read — only 4 scalar fields, no joins
   const campaign = await prisma.campaign.findUnique({
     where: { id: req.params['id'] as string },
-    select: { sentCount: true, failedCount: true, totalCount: true, status: true },
+    select: {
+      sentCount: true,
+      failedCount: true,
+      bouncedCount: true,
+      totalCount: true,
+      status: true,
+    },
   })
 
   if (!campaign) throw ApiError.notFound('Campaign not found')
 
-  const processed = campaign.sentCount + campaign.failedCount
+  const processed = campaign.sentCount + campaign.failedCount + campaign.bouncedCount
   const percentage = campaign.totalCount === 0
     ? 0
     : Math.round((processed / campaign.totalCount) * 100)
@@ -238,7 +244,7 @@ export const exportFailedRecipients = asyncHandler(async (req: Request, res: Res
     const batch = await prisma.campaignRecipient.findMany({
       where: {
         campaignId: id,
-        status: { in: [RecipientStatus.FAILED, RecipientStatus.BOUNCED] },
+        status: RecipientStatus.FAILED,
       },
       select: { name: true, email: true, phone: true, errorMessage: true },
       skip,

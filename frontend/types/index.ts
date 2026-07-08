@@ -40,6 +40,7 @@ export interface Campaign {
   totalCount: number
   sentCount: number
   failedCount: number
+  bouncedCount: number
   createdAt: string
   completedAt?: string | null
 }
@@ -157,6 +158,7 @@ export interface CampaignProgress {
   totalCount: number
   sentCount: number
   failedCount: number
+  bouncedCount: number
   percentage: number
 }
 
